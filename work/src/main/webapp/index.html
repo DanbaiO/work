@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>碳足迹</title>
+    <!-- element-ui引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 表格样式 -->
+    <style>
+        .demo-table-expand {
+            font-size: 0;
+        }
+        .demo-table-expand label {
+            width: 90px;
+            color: #99a9bf;
+        }
+        .demo-table-expand .el-form-item {
+            margin-right: 0;
+            margin-bottom: 0;
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!--添加数据对话框表单-->
+    <el-dialog
+            title="注册用户"
+            :visible.sync="dialogVisibleAdd"
+            width="30%"
+    >
+
+        <el-form ref="form" :model="addId" label-width="80px">
+            <el-form-item label="用户id">
+                <el-input v-model="addId"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="add">提交</el-button>
+                <el-button @click="dialogVisibleAdd = false">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+    <!--修改数据对话框表单-->
+    <el-dialog
+            title="修改用户数据"
+            :visible.sync="dialogVisibleUpdate"
+            width="30%"
+    >
+
+        <el-form ref="form" :model="carbon" label-width="80px">
+            <el-form-item label="用户id">
+                <el-input v-model="carbon.id"></el-input>
+            </el-form-item>
+            <el-form-item label="光盘打卡">
+                <el-input v-model="carbon.punchTheClock"></el-input>
+            </el-form-item>
+            <el-form-item label="绿色用水">
+                <el-input v-model="carbon.water"></el-input>
+            </el-form-item>
+            <el-form-item label="绿色用电">
+                <el-input v-model="carbon.electric"></el-input>
+            </el-form-item>
+            <el-form-item label="绿色出行">
+                <el-input v-model="carbon.goOut"></el-input>
+            </el-form-item>
+            <el-form-item label="回收减碳">
+                <el-input v-model="carbon.retrieve"></el-input>
+            </el-form-item>
+            <el-form-item label="打包减碳">
+                <el-input v-model="carbon.bale"></el-input>
+            </el-form-item>
+            <el-form-item label="公益减碳">
+                <el-input v-model="carbon.commonweal"></el-input>
+            </el-form-item>
+
+            <el-form-item>
+                <el-button type="primary" @click="update">提交</el-button>
+                <el-button @click="dialogVisibleUpdate = false">取消</el-button>
+            </el-form-item>
+        </el-form>
+
+    </el-dialog>
+    <!--查询用户对话框表单-->
+    <el-dialog
+            title="注册用户"
+            :visible.sync="dialogVisibleSelect"
+            width="30%"
+    >
+
+        <el-form ref="form" :model="id" label-width="80px">
+            <el-form-item label="用户id">
+                <el-input v-model="id"></el-input>
+            </el-form-item>
+            <el-form-item>
+                <el-button type="primary" @click="selectOne">提交</el-button>
+                <el-button @click="dialogVisibleSelect = false">取消</el-button>
+            </el-form-item>
+        </el-form>
+    </el-dialog>
+    <!-- 按钮 -->
+    <el-row>
+        <el-button type="primary" @click="dialogVisibleAdd = true">添加用户</el-button>
+        <el-button type="info" @click="dialogVisibleUpdate = true">修改信息</el-button>
+        <el-button type="success" @click="dialogVisibleSelect = true">查询用户</el-button>
+    </el-row>
+    <br>
+    <br>
+    <!-- 展示表格 -->
+    <template>
+        <el-table
+                :data="tableData"
+                style="width: 100%">
+            <el-table-column type="expand">
+                <template slot-scope="props">
+                    <el-form label-position="left" inline class="demo-table-expand">
+                        <el-form-item label="碳币总额">
+                            <span>{{ props.row.punchTheClock + props.row.water + props.row.electric
+                                + props.row.retrieve + props.row.bale + props.row.commonweal + props.row.goOut}}</span>
+                        </el-form-item>
+                        <el-form-item label="光盘打卡">
+                            <span>{{ props.row.punchTheClock }}</span>
+                        </el-form-item>
+                        <el-form-item label="绿色用水">
+                            <span>{{ props.row.water }}</span>
+                        </el-form-item>
+                        <el-form-item label="绿色用电">
+                            <span>{{ props.row.electric }}</span>
+                        </el-form-item>
+                        <el-form-item label="回收减碳">
+                            <span>{{ props.row.retrieve }}</span>
+                        </el-form-item>
+                        <el-form-item label="打包减碳">
+                            <span>{{ props.row.bale }}</span>
+                        </el-form-item>
+                        <el-form-item label="公益减碳">
+                            <span>{{ props.row.commonweal }}</span>
+                        </el-form-item>
+                        <el-form-item label="绿色出行">
+                            <span>{{ props.row.goOut }}</span>
+                        </el-form-item>
+                    </el-form>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    label="用户 ID"
+                    prop="id">
+            </el-table-column>
+        </el-table>
+    </template>
+
+</div>
+
+<!-- vue开发环境版本，包含了有帮助的命令行警告 -->
+<script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+<!-- axios-->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<!-- element-ui引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script>
+    new Vue({
+        el : "#app",
+        mounted(){
+            this.selectAll();
+        },
+        methods : {
+            selectAll() {
+                axios({
+                    method:"get",
+                    url:this.ip + "carbon/selectAll"
+                }).then(resp =>{
+                    this.tableData=resp.data;
+                })
+            },
+            selectOne() {
+                if (this.id == "" || this.id == null) {
+                    this.selectAll();
+                } else {
+                    axios({
+                        method:"get",
+                        url:this.ip + "carbon/selectOne?id=" + this.id
+                    }).then(resp =>{
+                        this.tableData=resp.data;
+                        this.dialogVisibleSelect = false;
+                        this.id  = null;
+                    })
+                }
+            },
+            add() {
+                axios({
+                    method:"get",
+                    url:this.ip + "carbon/add?addId=" + this.addId
+                }).then(resp =>{
+                    this.dialogVisibleAdd = false;
+                    this.selectAll();
+                    this.addId = null;
+                })
+            },
+            update() {
+                axios({
+                    method:"post",
+                    url:this.ip + "carbon/update",
+                    data:this.carbon
+                }).then(resp =>{
+                    this.dialogVisibleUpdate = false;
+                    this.selectAll();
+                    this.carbon = {
+                        id : "",
+                        punchTheClock : "",
+                        water : "",
+                        electric : "",
+                        goOut : "",
+                        retrieve : "",
+                        bale : "",
+                        commonweal : ""
+                    };
+                })
+            }
+        },
+        data() {
+            return {
+                /* ip地址 */
+                ip : "https://2aacf3eb.r2.cpolar.cn/work_war/",
+                /* 查询表格数据 */
+                tableData: null,
+                // 查询数据对话框是否展示的标记
+                dialogVisibleSelect : false,
+                /* 查询id */
+                id : null,
+                // 添加数据对话框是否展示的标记
+                dialogVisibleAdd: false,
+                /* 添加数据 */
+                addId : null,
+                // 添加数据对话框是否展示的标记
+                dialogVisibleUpdate : false,
+                /* 修改数据 */
+                carbon : {
+                    id : "",
+                    punchTheClock : "",
+                    water : "",
+                    electric : "",
+                    goOut : "",
+                    retrieve : "",
+                    bale : "",
+                    commonweal : ""
+                }
+            }
+        }
+    })
+</script>
+
+</body>
+</html>
